@@ -9,7 +9,7 @@ port = 1883
 user = "esp8266"
 password = "esp"
 
-db_location = 'data.db'
+db_location = '/home/justi/sound_lvl_app/data.db'
 db_table_name = 'sound_log'
 
 phone_nr = '+37067093991'
@@ -25,18 +25,17 @@ def write_sound_log(room_nr, sound_level):
     c = conn.cursor()
 
     c.execute(f"""
-        CREATE TABLE IF NOT EXISTS {db_table_name} (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            room_id INT,
+        CREATE TABLE IF NOT EXISTS sound_log (
+            room_id INT UNIQUE,
             time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             sound_level FLOAT NOT NULL
         );
     """)
 
-    c.execute(f"""
-        INSERT INTO {db_table_name} (room_id, sound_level)
-        VALUES (?, ?)
-    """, (room_nr, sound_level))
+    c.execute(
+        f"INSERT OR REPLACE INTO {db_table_name} (room_id, sound_level) VALUES (?, ?)",
+        (room_nr, sound_level)
+    )
 
     conn.commit()
     conn.close()
